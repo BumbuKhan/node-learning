@@ -5,6 +5,8 @@ var expressValidator = require('express-validator');
 var bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+var passport = require('passport');
+
 /* GET home page. */
 router.get('/', function (req, res) {
     res.render('home', {title: 'Home page'});
@@ -51,10 +53,36 @@ router.post('/register', function (req, res, next) {
                     throw err;
                 }
 
-                res.render('register', {title: 'Registration complete'})
+                db.query('SELECT LAST_INSERT_ID() as user_id', function (err, result, fields) {
+                    if (err) {
+                        throw err
+                    }
+
+                    var user_id = result[0];
+
+                    console.log(user_id);
+                    req.login(user_id, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        res.redirect('/');
+                    });
+
+                    req.login();
+                    res.render('register', {title: 'Registration complete'})
+                });
             });
         });
     }
+});
+
+passport.serializeUser(function (user_id, done) {
+    done(null, user_id);
+});
+
+passport.deserializeUser(function (user_id, done) {
+    done(null, user_id);
 });
 
 module.exports = router;

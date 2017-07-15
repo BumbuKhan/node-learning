@@ -9,7 +9,10 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+var session = require('express-session');
+
 var app = express();
+var passport = require('passport');
 
 require('dotenv').config();
 
@@ -26,6 +29,16 @@ app.use(expressValidator()); // this line must be immediately after any of the b
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: 'absolutely_random_sting_matherfucker',
+    resave: false,
+    saveUninitialized: false,
+    // cookie: {secure: true} // turn this on when connection will work through TLS (HTTPS)
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', index);
 app.use('/users', users);
